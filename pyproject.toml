@@ -1,0 +1,25 @@
+[project]
+name = "she-calc"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [{ name = "Nguyen Khac Duy", email = "khacduynguyen2001@gmail.com" }]
+requires-python = ">=3.13"
+dependencies = ["autosar-she", "customtkinter>=5.2.2"]
+
+[tool.uv]
+package = true
+
+[project.scripts]
+she-calc = "she_calc:main"
+
+[tool.uv.sources]
+autosar-she = { git = "https://github.com/nkdui/autosar-she.git" }
+
+
+[dependency-groups]
+dev = ["mypy>=1.18.2", "pylint>=4.0.1", "pytest-coverage>=0.0", "ruff>=0.14.0"]
+
+[build-system]
+requires = ["uv_build>=0.9.0,<0.10.0"]
+build-backend = "uv_build"

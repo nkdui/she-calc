@@ -10,9 +10,11 @@ from customtkinter import (
     CTkFrame,
     CTkLabel,
     CTkTextbox,
+    StringVar,
 )
 
 PAD = 5
+
 
 
 class InputProtFlg(CTkFrame):
@@ -61,7 +63,12 @@ class InputMemSlot(CTkFrame):
 class InputHex(CTkFrame):
     @property
     def value(self) -> bytes:
-        return bytes.fromhex(self._combo_hex.get())
+        current_choice = self._combo_hex.get()
+        values: list[str] = self._combo_hex.cget("values")
+        if current_choice not in values:
+            values.append(current_choice)
+            self._combo_hex.configure(values=values)
+        return bytes.fromhex(current_choice)
 
     def __init__(self, master: Any, title: str, **kwargs):
         super().__init__(master, **kwargs)
@@ -71,24 +78,57 @@ class InputHex(CTkFrame):
         self._title.grid(row=0, column=0, padx=PAD, pady=PAD, sticky=W)
 
         self._combo_hex = CTkComboBox(self, values=[""], width=300)
-        self._combo_hex.bind("<FocusOut>", self.__save_combo_value)
         self._combo_hex.grid(row=0, column=1, padx=PAD, pady=PAD, sticky=E)
 
-    def __save_combo_value(self, event) -> None:
-        current_choice = self._combo_hex.get()
-        values: list[str] = self._combo_hex.cget("values")
-        if current_choice not in values:
-            values.append(current_choice)
-            self._combo_hex.configure(values=values)
+
+class IntCounter(CTkFrame):
+    @property
+    def value(self) -> int:
+        return int(self._value.get())
+
+    def __init__(self, master: Any, **kwargs):
+        super().__init__(master, **kwargs)
+        self.columnconfigure((0, 2), weight=1)
+        self.columnconfigure(1, weight=2)
+
+        self._value = StringVar(value="0")
+        self._button_decr = CTkButton(
+            self, text="➖", width=30, command=self.__decrement
+        )
+        self._button_decr.grid(row=0, column=0, padx=PAD, pady=PAD, sticky=W)
+
+        self._label_value = CTkLabel(self, textvariable=self._value, width=50)
+        self._label_value.grid(row=0, column=1, padx=PAD, pady=PAD)
+
+        self._button_incr = CTkButton(
+            self, text="➕", width=30, command=self.__increment
+        )
+        self._button_incr.grid(row=0, column=2, padx=PAD, pady=PAD, sticky=E)
+
+    def __decrement(self):
+        current_value = int(self._value.get())
+        if current_value > 0:
+            self._value.set(str(current_value - 1))
+
+    def __increment(self):
+        current_value = int(self._value.get())
+        self._value.set(str(current_value + 1))
 
 
 class InputCounter(CTkFrame):
+    @property
+    def value(self) -> int:
+        return self._counter.value
+
     def __init__(self, master: Any, title: str, **kwargs):
         super().__init__(master, **kwargs)
         self.columnconfigure((0, 1), weight=1)
 
         self._title = CTkLabel(self, text=title)
         self._title.grid(row=0, column=0, padx=PAD, pady=PAD, sticky=W)
+
+        self._counter = IntCounter(self)
+        self._counter.grid(row=0, column=1, padx=PAD, pady=PAD, sticky=E)
 
 
 class InputGroup(CTkFrame):
@@ -111,6 +151,10 @@ class InputGroup(CTkFrame):
     @property
     def key_id(self) -> bytes:
         return self._input_key_id.value
+
+    @property
+    def c_id(self) -> int:
+        return self._input_c_id.value
 
     @property
     def protflg(self) -> ProtectionFlag:
@@ -138,8 +182,11 @@ class InputGroup(CTkFrame):
         self._input_key_id = InputHex(self, "Key (ID)")
         self._input_key_id.grid(row=5, column=0, padx=PAD, pady=PAD, sticky=EW)
 
+        self._input_c_id = InputCounter(self, "Counter (ID)")
+        self._input_c_id.grid(row=6, column=0, padx=PAD, pady=PAD, sticky=EW)
+
         self._input_protflg = InputProtFlg(self)
-        self._input_protflg.grid(row=6, column=0, padx=PAD, pady=PAD, sticky=EW)
+        self._input_protflg.grid(row=7, column=0, padx=PAD, pady=PAD, sticky=EW)
 
 
 class OutputGroup(CTkFrame):
@@ -183,13 +230,16 @@ class App(CTk):
         )
 
     def __calcuate(self):
-        self.group_output.text = f"""UID: {self.group_input.uid.hex()}
-Auth ID: {self.group_input.authid.__repr__()}
-Key (Auth ID): {self.group_input.key_authid.hex()}
-ID: {self.group_input.id.__repr__()}
-Key (ID): {self.group_input.key_id.hex()}
-ProtFlg: {self.group_input.protflg.__repr__()}
-"""
+        m12345 = memory_update(
+            uid=self.group_input.uid,
+            auth_id=self.group_input.authid,
+            k_auth_id=self.group_input.key_authid,
+            id_=self.group_input.id,
+            k_id=self.group_input.key_id,
+            c_id=self.group_input.c_id,
+            f_id=self.group_input.protflg,
+        )
+        self.group_output.text = "\n".join(m.hex().capitalize() for m in m12345)
 
 
 def main():

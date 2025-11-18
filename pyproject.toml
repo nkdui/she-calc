@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 authors = [{ name = "Nguyen Khac Duy", email = "khacduynguyen2001@gmail.com" }]
-requires-python = ">=3.13"
+requires-python = ">=3.11"
 dependencies = ["autosar-she", "customtkinter>=5.2.2"]
 
 [tool.uv]

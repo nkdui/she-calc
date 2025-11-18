@@ -1,4 +1,4 @@
-from tkinter import E, EW, NSEW, W
+from tkinter import EW, NSEW, E, W
 from typing import Any, Optional, Tuple
 
 from autosar_she import MemorySlot, ProtectionFlag, memory_update
@@ -14,7 +14,6 @@ from customtkinter import (
 )
 
 PAD = 5
-
 
 
 class InputProtFlg(CTkFrame):
@@ -58,6 +57,7 @@ class InputMemSlot(CTkFrame):
             self, state="readonly", values=[slot.name for slot in MemorySlot], width=150
         )
         self._combobox_slot.grid(row=0, column=1, padx=PAD, pady=PAD, sticky=E)
+        self._combobox_slot.set(MemorySlot.SECRET_KEY.name)
 
 
 class InputHex(CTkFrame):
@@ -93,7 +93,7 @@ class IntCounter(CTkFrame):
 
         self._value = StringVar(value="0")
         self._button_decr = CTkButton(
-            self, text="➖", width=30, command=self.__decrement
+            self, text="-", width=30, command=self.__decrement
         )
         self._button_decr.grid(row=0, column=0, padx=PAD, pady=PAD, sticky=W)
 
@@ -101,7 +101,7 @@ class IntCounter(CTkFrame):
         self._label_value.grid(row=0, column=1, padx=PAD, pady=PAD)
 
         self._button_incr = CTkButton(
-            self, text="➕", width=30, command=self.__increment
+            self, text="+", width=30, command=self.__increment
         )
         self._button_incr.grid(row=0, column=2, padx=PAD, pady=PAD, sticky=E)
 
